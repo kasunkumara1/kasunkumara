@@ -1,7 +1,7 @@
 const API_ROOT = "https://api.github.com";
 const DATA_PATHS = { projects: "data/projects.json", categories: "data/categories.json", site: "data/site.json" };
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-const state = { repo: null, token: "", projects: [], categories: [], site: {}, shas: {}, currentView: "dashboard", editingProject: null, editorMediaItems: [], selectedMediaFiles: [] };
+const state = { repo: null, token: "", projects: [], categories: [], site: {}, shas: {}, currentView: "dashboard", editingProject: null, editorMediaItems: [], selectedMediaFiles: [], removedMediaItems: [] };
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -192,6 +192,7 @@ function openProjectModal(project=null) {
   state.editingProject=project;
   state.editorMediaItems=projectMediaItems(project);
   state.selectedMediaFiles=[];
+  state.removedMediaItems=[];
   const form=$("#project-form");form.reset();
   $("#project-modal-title").textContent=project?"Edit Project":"Add New Project";
   form.elements.editingId.value=project?.id||"";
@@ -203,7 +204,7 @@ function openProjectModal(project=null) {
   $("#media-file").value=""; renderUploadPreview();
   $("#project-modal").classList.add("open");$("#project-modal").setAttribute("aria-hidden","false");
 }
-function closeProjectModal(){ $("#project-modal").classList.remove("open");$("#project-modal").setAttribute("aria-hidden","true");state.editingProject=null;state.editorMediaItems=[];state.selectedMediaFiles=[];$("#project-form").elements.id.disabled=false; }
+function closeProjectModal(){ $("#project-modal").classList.remove("open");$("#project-modal").setAttribute("aria-hidden","true");state.editingProject=null;state.editorMediaItems=[];state.selectedMediaFiles=[];state.removedMediaItems=[];$("#project-form").elements.id.disabled=false; }
 function renderUploadPreview(){
   const wrap=$("#upload-preview");wrap.replaceChildren();
   const combined=[...state.editorMediaItems.map((item,index)=>({kind:"saved",item,index})),...state.selectedMediaFiles.map((file,index)=>({kind:"file",file,index,item:{path:URL.createObjectURL(file),type:file.type.startsWith("video/")?"video":"image"}}))];
@@ -212,8 +213,10 @@ function renderUploadPreview(){
   combined.forEach(entry=>{
     const tile=document.createElement("div");tile.className="media-preview-tile";
     const item=entry.item; const media=document.createElement(item.type==="video"?"video":"img");media.src=entry.kind==="file"?item.path:publicMediaUrl(item.path);media.muted=true;media.playsInline=true;if(item.type==="video")media.preload="metadata";tile.appendChild(media);
-    const remove=document.createElement("button");remove.type="button";remove.className="remove-media";remove.textContent="×";remove.title="Remove media";
-    remove.addEventListener("click",e=>{e.stopPropagation(); if(entry.kind==="saved")state.editorMediaItems.splice(entry.index,1);else state.selectedMediaFiles.splice(entry.index,1);renderUploadPreview()});
+    const name=document.createElement("span");name.className="media-file-name";name.textContent=entry.kind==="file"?entry.file.name:(item.path.split("/").pop()||"Saved media");name.title=name.textContent;tile.appendChild(name);
+    const badge=document.createElement("span");badge.className=`media-state-badge ${entry.kind}`;badge.textContent=entry.kind==="saved"?"SAVED":"NEW";tile.appendChild(badge);
+    const remove=document.createElement("button");remove.type="button";remove.className="remove-media";remove.textContent="×";remove.title="Remove this media";
+    remove.addEventListener("click",e=>{e.stopPropagation(); if(entry.kind==="saved"){const removed=state.editorMediaItems[entry.index];if(removed)state.removedMediaItems.push(removed);state.editorMediaItems.splice(entry.index,1)}else state.selectedMediaFiles.splice(entry.index,1);renderUploadPreview()});
     tile.appendChild(remove);wrap.appendChild(tile);
   });
   if(combined.length<6){const add=document.createElement("button");add.type="button";add.className="add-more-media";add.innerHTML='<b>＋</b><span>Add more</span>';add.addEventListener("click",e=>{e.stopPropagation();$("#media-file").click()});wrap.appendChild(add)}
@@ -237,7 +240,11 @@ async function saveProjectFromForm(event){
     const first=mediaItems[0];
     const project={...(existing||{}),id,title:form.elements.title.value.trim(),category:form.elements.category.value,description:form.elements.description.value.trim(),tags:form.elements.tags.value.split(",").map(v=>v.trim()).filter(Boolean),mediaItems,media:first.path,mediaType:first.type,layout:form.elements.layout.value,published:form.elements.published.checked,featured:form.elements.featured.checked,client:form.elements.client.value.trim(),year:form.elements.year.value.trim(),role:form.elements.role.value.trim(),tools:form.elements.tools.value.trim(),externalUrl:form.elements.externalUrl.value.trim(),order:Number(form.elements.order.value)||0,updatedAt:new Date().toISOString(),createdAt:existing?.createdAt||new Date().toISOString()};
     if(existing)Object.assign(existing,project);else state.projects.push(project);
-    await persistProjects(`admin: ${existing?"update":"add"} project ${project.title}`);closeProjectModal();toast(`Project ${existing?"updated":"created"}. ${mediaItems.length} media item${mediaItems.length===1?"":"s"} saved.`);
+    await persistProjects(`admin: ${existing?"update":"add"} project ${project.title}`);
+    const cleanup=[...state.removedMediaItems].filter(item=>item?.path?.startsWith("assets/projects/"));
+    let cleanupFailed=0;
+    for(const item of cleanup){try{const meta=await getRawFileMeta(item.path);await deleteRepoFile(item.path,meta.sha,`admin: remove media from ${project.title}`)}catch(err){cleanupFailed++}}
+    closeProjectModal();toast(`Project ${existing?"updated":"created"}. ${mediaItems.length} media item${mediaItems.length===1?"":"s"} saved.${cleanupFailed?` ${cleanupFailed} old file could not be deleted from GitHub.`:""}`);
   }catch(e){toast(e.message,"error")}finally{button.disabled=false;button.textContent="Save Project"}
 }
 async function deleteProject(project){
