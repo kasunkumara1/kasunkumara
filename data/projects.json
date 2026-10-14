@@ -76,5 +76,31 @@
     "order": 3,
     "updatedAt": "2026-10-14T09:55:23.396Z",
     "createdAt": "2026-10-14T09:55:23.396Z"
+  },
+  {
+    "id": "work-place",
+    "title": "Work place",
+    "category": "video",
+    "description": "1",
+    "tags": [],
+    "mediaItems": [
+      {
+        "path": "assets/projects/work-place/1791971798759-8tc56-screenshot-538.png",
+        "type": "image"
+      }
+    ],
+    "media": "assets/projects/work-place/1791971798759-8tc56-screenshot-538.png",
+    "mediaType": "image",
+    "layout": "standard",
+    "published": true,
+    "featured": false,
+    "client": "",
+    "year": "2026",
+    "role": "",
+    "tools": "",
+    "externalUrl": "",
+    "order": 4,
+    "updatedAt": "2026-10-14T09:56:52.141Z",
+    "createdAt": "2026-10-14T09:56:52.141Z"
   }
 ]
