@@ -1,27 +1,5 @@
 [
   {
-    "id": "fine-art-retouching",
-    "title": "Fine Art Drawing & Photo Retouching Sample",
-    "category": "photo",
-    "description": "A visual study combining traditional art instincts with digital retouching, tonal balance and composition refinement.",
-    "tags": [
-      "Drawing",
-      "Photo Retouching",
-      "Composition"
-    ],
-    "media": "images/work1.jpg",
-    "mediaType": "image",
-    "layout": "tall",
-    "published": true,
-    "featured": true,
-    "client": "Personal Study",
-    "year": "2026",
-    "role": "Artist & Retoucher",
-    "tools": "Digital Retouching",
-    "externalUrl": "",
-    "order": 1
-  },
-  {
     "id": "viral-vertical-edit",
     "title": "TikTok Viral Vertical Edit (CapCut Pro)",
     "category": "video",
