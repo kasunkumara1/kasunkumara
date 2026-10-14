@@ -1,27 +1,5 @@
 [
   {
-    "id": "viral-vertical-edit",
-    "title": "TikTok Viral Vertical Edit (CapCut Pro)",
-    "category": "video",
-    "description": "A high-retention vertical edit optimized for fast pacing, mobile-first framing, subtitles and social-platform engagement.",
-    "tags": [
-      "CapCut Pro",
-      "Short-form",
-      "Retention Editing"
-    ],
-    "media": "images/work2.jpg",
-    "mediaType": "image",
-    "layout": "wide",
-    "published": true,
-    "featured": true,
-    "client": "Sample Project",
-    "year": "2026",
-    "role": "Video Editor",
-    "tools": "CapCut Pro",
-    "externalUrl": "",
-    "order": 2
-  },
-  {
     "id": "ai-product-ad",
     "title": "AI-Generated Product Ad Concept",
     "category": "ai",
