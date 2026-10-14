@@ -24,5 +24,31 @@
     "order": 1,
     "updatedAt": "2026-10-14T09:50:09.950Z",
     "createdAt": "2026-10-14T09:49:39.427Z"
+  },
+  {
+    "id": "work-2",
+    "title": "Work 2",
+    "category": "design",
+    "description": "2",
+    "tags": [],
+    "mediaItems": [
+      {
+        "path": "assets/projects/work-2/1791971439791-jblf7-gemini-generated-image-97m8ku97m8ku97m8.jpg",
+        "type": "image"
+      }
+    ],
+    "media": "assets/projects/work-2/1791971439791-jblf7-gemini-generated-image-97m8ku97m8ku97m8.jpg",
+    "mediaType": "image",
+    "layout": "standard",
+    "published": true,
+    "featured": false,
+    "client": "",
+    "year": "2026",
+    "role": "",
+    "tools": "",
+    "externalUrl": "",
+    "order": 2,
+    "updatedAt": "2026-10-14T09:50:59.665Z",
+    "createdAt": "2026-10-14T09:50:59.665Z"
   }
 ]
