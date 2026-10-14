@@ -1,39 +1,5 @@
 [
   {
-    "id": "social-media-package",
-    "title": "Educational Social Media Design Package",
-    "category": "design",
-    "description": "A coordinated social-media asset package combining educational design, promotional consistency and audience-focused visual communication.",
-    "tags": [
-      "Graphic Design",
-      "Social Media",
-      "Brand Assets"
-    ],
-    "media": "images/work3.jpg",
-    "mediaType": "image",
-    "layout": "standard",
-    "published": true,
-    "featured": false,
-    "client": "Sample Project",
-    "year": "2026",
-    "role": "Graphic Designer",
-    "tools": "Design Suite",
-    "externalUrl": "",
-    "order": 4,
-    "mediaItems": [
-      {
-        "path": "images/work3.jpg",
-        "type": "image"
-      },
-      {
-        "path": "assets/projects/social-media-package/1791971072032-j8oux-gemini-generated-image-b7ahxjb7ahxjb7ah.jpg",
-        "type": "image"
-      }
-    ],
-    "updatedAt": "2026-10-14T09:44:36.683Z",
-    "createdAt": "2026-10-14T09:44:36.683Z"
-  },
-  {
     "id": "timeline-editing",
     "title": "High-Retention Timeline Editing & Content Build",
     "category": "video",
