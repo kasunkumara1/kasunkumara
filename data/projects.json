@@ -154,5 +154,31 @@
     "order": 6,
     "updatedAt": "2026-10-14T09:59:57.777Z",
     "createdAt": "2026-10-14T09:59:57.777Z"
+  },
+  {
+    "id": "first-event",
+    "title": "First Event",
+    "category": "video",
+    "description": "1",
+    "tags": [],
+    "mediaItems": [
+      {
+        "path": "assets/projects/first-event/1791972024271-batba-work1.jpg",
+        "type": "image"
+      }
+    ],
+    "media": "assets/projects/first-event/1791972024271-batba-work1.jpg",
+    "mediaType": "image",
+    "layout": "standard",
+    "published": true,
+    "featured": false,
+    "client": "",
+    "year": "2026",
+    "role": "",
+    "tools": "",
+    "externalUrl": "",
+    "order": 7,
+    "updatedAt": "2026-10-14T10:00:26.815Z",
+    "createdAt": "2026-10-14T10:00:26.815Z"
   }
 ]
