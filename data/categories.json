@@ -1,0 +1,6 @@
+[
+  {"id":"video","label":"Video Editing","order":1},
+  {"id":"ai","label":"AI Ads & Renders","order":2},
+  {"id":"design","label":"Graphic Design","order":3},
+  {"id":"photo","label":"Photography & Art","order":4}
+]
