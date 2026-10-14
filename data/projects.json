@@ -102,5 +102,31 @@
     "order": 4,
     "updatedAt": "2026-10-14T09:56:52.141Z",
     "createdAt": "2026-10-14T09:56:52.141Z"
+  },
+  {
+    "id": "work-place-1",
+    "title": "Work place 1",
+    "category": "ai",
+    "description": "Work place 1",
+    "tags": [],
+    "mediaItems": [
+      {
+        "path": "assets/projects/work-place-1/1791971842438-wxxp7-screenshot-539.png",
+        "type": "image"
+      }
+    ],
+    "media": "assets/projects/work-place-1/1791971842438-wxxp7-screenshot-539.png",
+    "mediaType": "image",
+    "layout": "standard",
+    "published": true,
+    "featured": false,
+    "client": "",
+    "year": "2026",
+    "role": "",
+    "tools": "",
+    "externalUrl": "",
+    "order": 5,
+    "updatedAt": "2026-10-14T09:57:38.972Z",
+    "createdAt": "2026-10-14T09:57:38.972Z"
   }
 ]
