@@ -158,7 +158,7 @@
   {
     "id": "first-event",
     "title": "First Event",
-    "category": "video",
+    "category": "photo",
     "description": "1",
     "tags": [],
     "mediaItems": [
@@ -178,7 +178,7 @@
     "tools": "",
     "externalUrl": "",
     "order": 7,
-    "updatedAt": "2026-10-14T10:00:26.815Z",
+    "updatedAt": "2026-10-14T10:00:36.190Z",
     "createdAt": "2026-10-14T10:00:26.815Z"
   }
 ]
