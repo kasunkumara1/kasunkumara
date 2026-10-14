@@ -151,10 +151,10 @@
           </div>
           <aside class="editor-side">
             <div class="upload-box" id="upload-box">
-              <input id="media-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" />
-              <div id="upload-preview" class="upload-preview"><b>＋</b><strong>Drop project media</strong><span>JPG, PNG, WEBP, GIF, MP4, WEBM, MOV<br />Recommended under 25 MB</span></div>
+              <input id="media-file" type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" />
+              <div id="upload-preview" class="upload-preview empty"><b>＋</b><strong>Drop 2–3 project files</strong><span>Photos + videos supported. Up to 6 files; first 3 appear together on the card.</span></div>
             </div>
-            <label><span>Or media URL/path</span><input name="media" placeholder="assets/projects/... or https://..." /></label>
+            <label><span>Optional extra media URL/path</span><input name="media" placeholder="https://... or assets/projects/..." /></label>
             <div class="form-two"><label><span>Card layout</span><select name="layout"><option value="standard">Standard</option><option value="wide">Wide</option><option value="tall">Tall</option></select></label><label><span>Display order</span><input type="number" name="order" min="0" value="10" /></label></div>
             <label class="toggle-row"><span><strong>Published</strong><small>Visible on public portfolio</small></span><input type="checkbox" name="published" checked /></label>
             <label class="toggle-row"><span><strong>Featured</strong><small>Push near the top of gallery</small></span><input type="checkbox" name="featured" /></label>
