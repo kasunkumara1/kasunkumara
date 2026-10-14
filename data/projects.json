@@ -50,5 +50,31 @@
     "order": 2,
     "updatedAt": "2026-10-14T09:50:59.665Z",
     "createdAt": "2026-10-14T09:50:59.665Z"
+  },
+  {
+    "id": "video-1",
+    "title": "Video 1",
+    "category": "video",
+    "description": "Video 1",
+    "tags": [],
+    "mediaItems": [
+      {
+        "path": "assets/projects/video-1/1791971698117-zy012-0927-1-copy-copy-copy-1-compressed-by-happyscribe-com.mp4",
+        "type": "video"
+      }
+    ],
+    "media": "assets/projects/video-1/1791971698117-zy012-0927-1-copy-copy-copy-1-compressed-by-happyscribe-com.mp4",
+    "mediaType": "video",
+    "layout": "standard",
+    "published": true,
+    "featured": false,
+    "client": "",
+    "year": "2026",
+    "role": "",
+    "tools": "",
+    "externalUrl": "",
+    "order": 3,
+    "updatedAt": "2026-10-14T09:55:23.396Z",
+    "createdAt": "2026-10-14T09:55:23.396Z"
   }
 ]
