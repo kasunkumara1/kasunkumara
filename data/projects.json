@@ -1,27 +1,5 @@
 [
   {
-    "id": "ai-product-ad",
-    "title": "AI-Generated Product Ad Concept",
-    "category": "ai",
-    "description": "A conversion-focused generative advertising concept built through controlled prompt engineering, product framing and cinematic art direction.",
-    "tags": [
-      "AI Ads",
-      "Prompt Engineering",
-      "Product Visuals"
-    ],
-    "media": "images/work3.jpg",
-    "mediaType": "image",
-    "layout": "standard",
-    "published": true,
-    "featured": false,
-    "client": "Concept Work",
-    "year": "2026",
-    "role": "AI Creative Director",
-    "tools": "Generative AI",
-    "externalUrl": "",
-    "order": 3
-  },
-  {
     "id": "social-media-package",
     "title": "Educational Social Media Design Package",
     "category": "design",
