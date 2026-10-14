@@ -1,7 +1,7 @@
 const API_ROOT = "https://api.github.com";
 const DATA_PATHS = { projects: "data/projects.json", categories: "data/categories.json", site: "data/site.json" };
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-const state = { repo: null, token: "", projects: [], categories: [], site: {}, shas: {}, currentView: "dashboard", editingProject: null };
+const state = { repo: null, token: "", projects: [], categories: [], site: {}, shas: {}, currentView: "dashboard", editingProject: null, editorMediaItems: [], selectedMediaFiles: [] };
 
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -118,6 +118,20 @@ function publicMediaUrl(path) {
   const root = location.pathname.includes("/admin/") ? "../" : "";
   return `${root}${path.replace(/^\/+/,"")}`;
 }
+
+function projectMediaItems(project) {
+  if (Array.isArray(project?.mediaItems) && project.mediaItems.length) return project.mediaItems.filter(item => item && item.path).map(item => ({ path:item.path, type:item.type || (/\.(mp4|webm|mov)(\?|$)/i.test(item.path) ? "video" : "image") }));
+  if (project?.media) return [{ path:project.media, type:project.mediaType || (/\.(mp4|webm|mov)(\?|$)/i.test(project.media) ? "video" : "image") }];
+  return [];
+}
+function mediaElement(item, className="") {
+  const el = document.createElement(item?.type === "video" ? "video" : "img");
+  if (className) el.className = className;
+  if (item?.path) el.src = publicMediaUrl(item.path);
+  if (item?.type === "video") { el.muted = true; el.playsInline = true; el.preload = "metadata"; }
+  return el;
+}
+
 function renderDashboard() {
   $("#stat-projects").textContent = state.projects.length;
   $("#stat-published").textContent = state.projects.filter(p => p.published !== false).length;
@@ -128,7 +142,7 @@ function renderDashboard() {
   if (!recent.length) { wrap.innerHTML = '<div class="mini-project"><span>No projects yet.</span></div>'; return; }
   recent.forEach(project => {
     const row = document.createElement("div"); row.className="mini-project";
-    const media = document.createElement(project.mediaType === "video" ? "video" : "img"); media.className="mini-thumb"; if (project.media) media.src=publicMediaUrl(project.media);
+    const first = projectMediaItems(project)[0]; const media = first ? mediaElement(first, "mini-thumb") : document.createElement("div"); if (!first) media.className="mini-thumb";
     const info=document.createElement("div"); const title=document.createElement("strong"); title.textContent=project.title; const meta=document.createElement("span"); meta.textContent=categoryLabel(project.category); info.append(title,meta);
     const status=document.createElement("em"); status.className=`status-pill${project.published===false?" draft":""}`; status.textContent=project.published===false?"DRAFT":"LIVE";
     row.append(media,info,status); wrap.appendChild(row);
@@ -155,7 +169,7 @@ function renderProjects() {
   projects.forEach(project=>{
     const row=document.createElement("article"); row.className="project-row";
     const thumb=document.createElement("div");thumb.className="project-thumb";
-    if(project.media){const media=document.createElement(project.mediaType==="video"?"video":"img");media.src=publicMediaUrl(project.media);media.muted=true;thumb.appendChild(media)} else thumb.textContent="NO MEDIA";
+    const items=projectMediaItems(project).slice(0,3); if(items.length){thumb.classList.toggle("multi",items.length>1);items.forEach(item=>thumb.appendChild(mediaElement(item)))} else thumb.textContent="NO MEDIA";
     const info=document.createElement("div");info.className="project-info"; const strong=document.createElement("strong");strong.textContent=project.title; const desc=document.createElement("span");desc.textContent=project.description||"";info.append(strong,desc);
     const cat=document.createElement("div");cat.className="project-category";cat.textContent=categoryLabel(project.category);
     const order=document.createElement("div");order.className="project-order";order.textContent=`Order ${project.order ?? "—"}`;
@@ -176,6 +190,8 @@ function populateProjectCategorySelect(select, value="") { select.replaceChildre
 function openProjectModal(project=null) {
   if(!state.token){showConnect();return}
   state.editingProject=project;
+  state.editorMediaItems=projectMediaItems(project);
+  state.selectedMediaFiles=[];
   const form=$("#project-form");form.reset();
   $("#project-modal-title").textContent=project?"Edit Project":"Add New Project";
   form.elements.editingId.value=project?.id||"";
@@ -183,30 +199,45 @@ function openProjectModal(project=null) {
   populateProjectCategorySelect(form.elements.category,project?.category||state.categories[0]?.id||"");
   form.elements.description.value=project?.description||""; form.elements.tags.value=(project?.tags||[]).join(", ");
   form.elements.client.value=project?.client||"";form.elements.year.value=project?.year||new Date().getFullYear();form.elements.role.value=project?.role||"";form.elements.tools.value=project?.tools||"";form.elements.externalUrl.value=project?.externalUrl||"";
-  form.elements.media.value=project?.media||"";form.elements.layout.value=project?.layout||"standard";form.elements.order.value=project?.order??state.projects.length+1;form.elements.published.checked=project?.published!==false;form.elements.featured.checked=Boolean(project?.featured);
-  $("#media-file").value=""; renderUploadPreview(project?.media||"",project?.mediaType||"image");
+  form.elements.media.value="";form.elements.layout.value=project?.layout||"standard";form.elements.order.value=project?.order??state.projects.length+1;form.elements.published.checked=project?.published!==false;form.elements.featured.checked=Boolean(project?.featured);
+  $("#media-file").value=""; renderUploadPreview();
   $("#project-modal").classList.add("open");$("#project-modal").setAttribute("aria-hidden","false");
 }
-function closeProjectModal(){ $("#project-modal").classList.remove("open");$("#project-modal").setAttribute("aria-hidden","true");state.editingProject=null;$("#project-form").elements.id.disabled=false; }
-function renderUploadPreview(source="", type="image", file=null){ const wrap=$("#upload-preview");wrap.replaceChildren(); if(source||file){ const media=document.createElement(type==="video"?"video":"img"); media.controls=type==="video"; media.muted=type==="video"; media.src=file?URL.createObjectURL(file):publicMediaUrl(source); wrap.appendChild(media); return; } wrap.innerHTML='<b>＋</b><strong>Drop project media</strong><span>JPG, PNG, WEBP, GIF, MP4, WEBM, MOV<br />Recommended under 25 MB</span>'; }
+function closeProjectModal(){ $("#project-modal").classList.remove("open");$("#project-modal").setAttribute("aria-hidden","true");state.editingProject=null;state.editorMediaItems=[];state.selectedMediaFiles=[];$("#project-form").elements.id.disabled=false; }
+function renderUploadPreview(){
+  const wrap=$("#upload-preview");wrap.replaceChildren();
+  const combined=[...state.editorMediaItems.map((item,index)=>({kind:"saved",item,index})),...state.selectedMediaFiles.map((file,index)=>({kind:"file",file,index,item:{path:URL.createObjectURL(file),type:file.type.startsWith("video/")?"video":"image"}}))];
+  if(!combined.length){wrap.className="upload-preview empty";wrap.innerHTML='<b>＋</b><strong>Drop 2–3 project files</strong><span>Select up to 6 images/videos. The first 3 show together on the portfolio card.</span>';return}
+  wrap.className=`upload-preview media-grid count-${Math.min(combined.length,3)}`;
+  combined.forEach(entry=>{
+    const tile=document.createElement("div");tile.className="media-preview-tile";
+    const item=entry.item; const media=document.createElement(item.type==="video"?"video":"img");media.src=entry.kind==="file"?item.path:publicMediaUrl(item.path);media.muted=true;media.playsInline=true;if(item.type==="video")media.preload="metadata";tile.appendChild(media);
+    const remove=document.createElement("button");remove.type="button";remove.className="remove-media";remove.textContent="×";remove.title="Remove media";
+    remove.addEventListener("click",e=>{e.stopPropagation(); if(entry.kind==="saved")state.editorMediaItems.splice(entry.index,1);else state.selectedMediaFiles.splice(entry.index,1);renderUploadPreview()});
+    tile.appendChild(remove);wrap.appendChild(tile);
+  });
+  if(combined.length<6){const add=document.createElement("button");add.type="button";add.className="add-more-media";add.innerHTML='<b>＋</b><span>Add more</span>';add.addEventListener("click",e=>{e.stopPropagation();$("#media-file").click()});wrap.appendChild(add)}
+}
 async function uploadProjectMedia(file, projectId) {
-  if(file.size>MAX_UPLOAD_BYTES) throw new Error("This CMS limits direct uploads to 25 MB. Compress the media or use an external video link.");
-  const extName=safeFilename(file.name); const path=`assets/projects/${slugify(projectId)}/${Date.now()}-${extName}`;
+  if(file.size>MAX_UPLOAD_BYTES) throw new Error(`${file.name} is over 25 MB. Compress it or use an external video link.`);
+  const extName=safeFilename(file.name); const path=`assets/projects/${slugify(projectId)}/${Date.now()}-${Math.random().toString(36).slice(2,7)}-${extName}`;
   const base64=await fileToBase64(file); await putBase64(path,base64,`admin: upload media for ${projectId}`);
-  return { media:path, mediaType:file.type.startsWith("video/")?"video":"image" };
+  return { path, type:file.type.startsWith("video/")?"video":"image" };
 }
 async function saveProjectFromForm(event){
   event.preventDefault(); const form=event.currentTarget; const button=$("#save-project");button.disabled=true;button.textContent="Saving…";
   try{
     const editingId=form.elements.editingId.value; const id=editingId||slugify(form.elements.id.value||form.elements.title.value); if(!id)throw new Error("Project ID is required.");
     if(!editingId&&state.projects.some(p=>p.id===id))throw new Error("A project with this ID already exists.");
-    let media=form.elements.media.value.trim(); let mediaType=state.editingProject?.mediaType||"image"; const file=$("#media-file").files[0];
-    if(file){const uploaded=await uploadProjectMedia(file,id);media=uploaded.media;mediaType=uploaded.mediaType;}
-    else if(media&&/\.(mp4|webm|mov)(\?|$)/i.test(media))mediaType="video"; else if(media)mediaType="image";
+    const mediaItems=[...state.editorMediaItems];
+    for(const file of state.selectedMediaFiles){mediaItems.push(await uploadProjectMedia(file,id))}
+    const manual=form.elements.media.value.trim(); if(manual){mediaItems.push({path:manual,type:/\.(mp4|webm|mov)(\?|$)/i.test(manual)?"video":"image"})}
+    if(!mediaItems.length)throw new Error("Add at least one image/video or media URL.");
     const existing=state.projects.find(p=>p.id===editingId);
-    const project={...(existing||{}),id,title:form.elements.title.value.trim(),category:form.elements.category.value,description:form.elements.description.value.trim(),tags:form.elements.tags.value.split(",").map(v=>v.trim()).filter(Boolean),media,mediaType,layout:form.elements.layout.value,published:form.elements.published.checked,featured:form.elements.featured.checked,client:form.elements.client.value.trim(),year:form.elements.year.value.trim(),role:form.elements.role.value.trim(),tools:form.elements.tools.value.trim(),externalUrl:form.elements.externalUrl.value.trim(),order:Number(form.elements.order.value)||0,updatedAt:new Date().toISOString(),createdAt:existing?.createdAt||new Date().toISOString()};
+    const first=mediaItems[0];
+    const project={...(existing||{}),id,title:form.elements.title.value.trim(),category:form.elements.category.value,description:form.elements.description.value.trim(),tags:form.elements.tags.value.split(",").map(v=>v.trim()).filter(Boolean),mediaItems,media:first.path,mediaType:first.type,layout:form.elements.layout.value,published:form.elements.published.checked,featured:form.elements.featured.checked,client:form.elements.client.value.trim(),year:form.elements.year.value.trim(),role:form.elements.role.value.trim(),tools:form.elements.tools.value.trim(),externalUrl:form.elements.externalUrl.value.trim(),order:Number(form.elements.order.value)||0,updatedAt:new Date().toISOString(),createdAt:existing?.createdAt||new Date().toISOString()};
     if(existing)Object.assign(existing,project);else state.projects.push(project);
-    await persistProjects(`admin: ${existing?"update":"add"} project ${project.title}`);closeProjectModal();toast(`Project ${existing?"updated":"created"}. GitHub Pages will publish the commit.`);
+    await persistProjects(`admin: ${existing?"update":"add"} project ${project.title}`);closeProjectModal();toast(`Project ${existing?"updated":"created"}. ${mediaItems.length} media item${mediaItems.length===1?"":"s"} saved.`);
   }catch(e){toast(e.message,"error")}finally{button.disabled=false;button.textContent="Save Project"}
 }
 async function deleteProject(project){
@@ -214,8 +245,9 @@ async function deleteProject(project){
   const original=[...state.projects];state.projects=state.projects.filter(p=>p.id!==project.id);
   try{
     await persistProjects(`admin: delete project ${project.title}`);
-    if(project.media&&project.media.startsWith("assets/projects/")&&confirm("Also delete this project's uploaded media file from the repository?")){
-      try{const meta=await getRawFileMeta(project.media);await deleteRepoFile(project.media,meta.sha,`admin: delete media for ${project.title}`)}catch(e){toast(`Project deleted, but media cleanup failed: ${e.message}`,"error");return}
+    const uploaded=projectMediaItems(project).filter(item=>item.path&&item.path.startsWith("assets/projects/"));
+    if(uploaded.length&&confirm(`Also delete ${uploaded.length} uploaded media file${uploaded.length===1?"":"s"} from the repository?`)){
+      for(const item of uploaded){try{const meta=await getRawFileMeta(item.path);await deleteRepoFile(item.path,meta.sha,`admin: delete media for ${project.title}`)}catch(e){toast(`Project deleted, but some media cleanup failed: ${e.message}`,"error");break}}
     }
     toast("Project deleted.");
   }catch(e){state.projects=original;renderAll();toast(e.message,"error")}
@@ -249,7 +281,11 @@ $("#close-project-modal").addEventListener("click",closeProjectModal);$("#cancel
 $("#project-search").addEventListener("input",renderProjects);$("#project-filter").addEventListener("change",renderProjects);$("#status-filter").addEventListener("change",renderProjects);
 $("#category-form").addEventListener("submit",addCategory);$("#category-name").addEventListener("input",event=>{if(!$("#category-id").dataset.edited)$("#category-id").value=slugify(event.target.value)});$("#category-id").addEventListener("input",()=>$("#category-id").dataset.edited="1");
 $("#site-form").addEventListener("submit",saveSite);$("#export-backup").addEventListener("click",exportBackup);$("#import-backup").addEventListener("click",importBackup);
-const fileInput=$("#media-file"), uploadBox=$("#upload-box");fileInput.addEventListener("change",()=>{const file=fileInput.files[0];if(file)renderUploadPreview("",file.type.startsWith("video/")?"video":"image",file)});["dragenter","dragover"].forEach(type=>uploadBox.addEventListener(type,e=>{e.preventDefault();uploadBox.classList.add("drag")}));["dragleave","drop"].forEach(type=>uploadBox.addEventListener(type,e=>{e.preventDefault();uploadBox.classList.remove("drag")}));uploadBox.addEventListener("drop",e=>{const file=e.dataTransfer.files[0];if(file){const dt=new DataTransfer();dt.items.add(file);fileInput.files=dt.files;renderUploadPreview("",file.type.startsWith("video/")?"video":"image",file)}});
+const fileInput=$("#media-file"), uploadBox=$("#upload-box");
+function addSelectedFiles(files){const allowed=[...files].filter(file=>file.type.startsWith("image/")||file.type.startsWith("video/"));const room=Math.max(0,6-state.editorMediaItems.length-state.selectedMediaFiles.length);state.selectedMediaFiles.push(...allowed.slice(0,room));if(allowed.length>room)toast("Maximum 6 media files per project.","error");fileInput.value="";renderUploadPreview()}
+fileInput.addEventListener("change",()=>addSelectedFiles(fileInput.files));
+uploadBox.addEventListener("click",e=>{if(e.target===fileInput||e.target.closest(".remove-media,.add-more-media"))return;fileInput.click()});
+["dragenter","dragover"].forEach(type=>uploadBox.addEventListener(type,e=>{e.preventDefault();uploadBox.classList.add("drag")}));["dragleave","drop"].forEach(type=>uploadBox.addEventListener(type,e=>{e.preventDefault();uploadBox.classList.remove("drag")}));uploadBox.addEventListener("drop",e=>addSelectedFiles(e.dataTransfer.files));
 $("#project-form").elements.title.addEventListener("input",e=>{const id=$("#project-form").elements.id;if(!state.editingProject&&!id.dataset.edited)id.value=slugify(e.target.value)});$("#project-form").elements.id.addEventListener("input",e=>e.target.dataset.edited="1");
 $("#project-modal").addEventListener("click",e=>{if(e.target.id==="project-modal")closeProjectModal()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#project-modal").classList.contains("open"))closeProjectModal()});
 
