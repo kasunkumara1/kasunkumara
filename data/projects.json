@@ -128,5 +128,31 @@
     "order": 5,
     "updatedAt": "2026-10-14T09:57:38.972Z",
     "createdAt": "2026-10-14T09:57:38.972Z"
+  },
+  {
+    "id": "ai-video-1",
+    "title": "AI Video 1",
+    "category": "ai",
+    "description": "Video 1",
+    "tags": [],
+    "mediaItems": [
+      {
+        "path": "assets/projects/ai-video-1/1791971973717-5nlsr-scene-03-mp4-20261010153717.mp4",
+        "type": "video"
+      }
+    ],
+    "media": "assets/projects/ai-video-1/1791971973717-5nlsr-scene-03-mp4-20261010153717.mp4",
+    "mediaType": "video",
+    "layout": "standard",
+    "published": true,
+    "featured": false,
+    "client": "",
+    "year": "2026",
+    "role": "",
+    "tools": "",
+    "externalUrl": "",
+    "order": 6,
+    "updatedAt": "2026-10-14T09:59:57.777Z",
+    "createdAt": "2026-10-14T09:59:57.777Z"
   }
 ]
