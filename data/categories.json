@@ -18,10 +18,5 @@
     "id": "photo",
     "label": "Photography & Art",
     "order": 4
-  },
-  {
-    "id": "ete",
-    "label": "ete",
-    "order": 5
   }
 ]
